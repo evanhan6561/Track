@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 const initialCentiseconds = 0;
 
@@ -11,7 +11,6 @@ const Stopwatch = ({ timer }) => {
 
     const [centiseconds, setCentiseconds] = useState(initialCentiseconds);
     const [ticking, setTicking] = useState(false);
-    const [ticker, setTicker] = useState(null);
 
     /* 
     https://stackoverflow.com/questions/53024496/state-not-updating-when-using-react-state-hook-within-setinterval
@@ -31,15 +30,19 @@ const Stopwatch = ({ timer }) => {
     }
 
     const startStop = () => {
-        if (ticking){
-            // Shutdown the ticker
-            clearInterval(ticker);
-        }else{
-            // Start ticker
-            setTicker(window.setInterval(tick, 100));
-        }
         setTicking(!ticking);
     }
+
+    // Tick if "ticking = true"
+    useEffect(() => {
+        let ticker;
+        if (ticking){
+            ticker = setInterval(tick, 100);
+        }
+        return function cleanup(){
+            clearInterval(ticker);
+        }
+    }, [ticking])
 
     const displayTime = () => {
         let remainingSeconds = Math.floor(centiseconds / 10);
@@ -71,7 +74,7 @@ const Stopwatch = ({ timer }) => {
     }
 
     const reset = () => {
-        startStop();
+        setTicking(false);
         setCentiseconds(initialCentiseconds);
     }
 
@@ -83,7 +86,7 @@ const Stopwatch = ({ timer }) => {
             <div>
                 <input type='button' onClick={startStop} value={ticking ? 'Stop': 'Start'}/>
                 <input type='button' onClick={reset} value='Reset'/>
-                <input type='button' value='Submit'/>
+                <input type='button' value='Log'/>
             </div>
         </div>
     );

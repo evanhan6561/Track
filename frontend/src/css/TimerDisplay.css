@@ -24,10 +24,17 @@
     cursor: pointer;
 }
 
+.timer-current{
+    font-weight: 600;
+    font-size: larger;
+    margin-bottom: 1em;
+}
+
 .timer-display{
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding: 10px;
 }

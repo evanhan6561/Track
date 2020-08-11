@@ -1,5 +1,4 @@
 import React, {useReducer} from 'react';
-import { useEffect } from 'react';
 import '../css/TimerDisplay.css'
 import Stopwatch from './Stopwatch';
 import PomodoroTimer from './PomodoroTimer';
@@ -15,14 +14,8 @@ const timerReducer = (state, action) => {
     }
 }
 
-
-
 const TimerDisplay = () => {
     const [timer, dispatch] = useReducer(timerReducer, 'Pomodoro');
-
-    // Component Did Mount Equivalent
-    useEffect(() => {
-    }, [])
 
     return (
         <div className='timer-display-wrapper'>
@@ -37,7 +30,7 @@ const TimerDisplay = () => {
                     </li>
                 </ul>
                 <div className='timer-display'>
-                    <div>{timer}</div>
+                    <div className='timer-current'>{timer}</div>
                     <PomodoroTimer timer={timer}/>
                     <Stopwatch timer={timer}/>
                 </div>
