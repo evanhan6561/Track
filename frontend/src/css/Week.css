@@ -1,0 +1,4 @@
+/*  7 Days per week, make them equal width */
+.day-name{
+    width: calc(100% / 7);
+}

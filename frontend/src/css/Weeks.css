@@ -1,0 +1,17 @@
+/* The <tr> wrapper around Sunday, Monday, ... */
+.day-names{
+    text-align: center;
+    color: #337054;
+}
+
+.calendar{
+    height: 100%;
+}
+
+.calendar td, .calendar th{
+    border:1px solid #49A078;
+}
+
+.calendar th{
+    border-top: none;
+}

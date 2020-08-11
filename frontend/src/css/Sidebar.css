@@ -1,0 +1,21 @@
+aside{
+    display: flex;
+    flex-direction: column;
+
+    min-width: 200px;
+    padding: 1em;
+}
+
+/* Two components in the Sidebar:
+    - The Goals List
+    - The Timer Display
+    Make sure they never take up too much space
+*/
+.goals-wrapper, .timer-display-wrapper{
+    max-height: 50%;
+}
+
+.goals-list{
+    list-style-type: none;
+    padding-left: 1em;
+}
