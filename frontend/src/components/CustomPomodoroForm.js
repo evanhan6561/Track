@@ -55,14 +55,14 @@ const CustomPomodoroForm = ({ setStartingWorkCentiseconds, setStartingRestCentis
         let workStartTime;
         let restStartTime;
         if (minuteWorkValue === '' || minuteWorkValue <= 0 || minuteWorkValue > 1440) {
-            // Default to 25 minutes in case of malformed input
+            // Default to 25 minutes work in case of malformed input
             workStartTime = 10 * 60 * 25;
         } else {
             workStartTime = minuteWorkValue * 60 * 10;
         }
 
         if (minuteRestValue === '' || minuteRestValue <= 0 || minuteRestValue > 1440) {
-            // Default to 5 minutes in case of malformed input
+            // Default to 5 minutes rest in case of malformed input
             restStartTime = 10 * 60 * 5;
         } else {
             restStartTime = minuteRestValue * 60 * 10;

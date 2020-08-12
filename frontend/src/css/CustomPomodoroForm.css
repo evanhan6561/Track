@@ -1,3 +1,7 @@
 .custom-pomodoro-form{
     text-align: left;
 }
+
+.custom-pomodoro-form input{
+    transition: .2s;
+}
