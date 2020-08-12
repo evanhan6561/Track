@@ -1,3 +1,5 @@
+import React, {useState} from 'react';
+
 export function numToMonth(n){
     let month;
     switch(n){
@@ -51,4 +53,21 @@ export function numToMonth(n){
  */
 export function getMonth(d){
     return d.getMonth() + 1;
+}
+
+
+/* https://stackoverflow.com/questions/55757761/handle-an-input-with-react-hooks
+    A reusable way of handling the state of forms
+
+    i.e. {id: 'username-input', label: 'Username:', type: 'text'}
+*/
+export function useInput(options) {
+    const [value, setValue] = useState("");
+    const input = (
+        <>
+            <label htmlFor={options.id}>{options.label}</label><br />
+            <input id={options.id} value={value} onChange={e => setValue(e.target.value)} type={options.type} />
+        </>
+    );
+    return [value, input];
 }
