@@ -3,8 +3,6 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
-
-
 router.post('/register', async function (req, res, next) {
     try {
         const { username, password } = req.body;
@@ -12,7 +10,13 @@ router.post('/register', async function (req, res, next) {
         let hash = await bcrypt.hash(password, saltRounds);
 
         // Error handling in an async call with a callback is a bit tricky. Throwing an error in the callback doesn't work.
-        let user = await User.create({ username: username, password: hash });   // Using await means User can throw duplicate errors.
+        let user = await User.create({ username: username, password: hash }).then(() => {
+            res.status(409);    // 409 - Request conflicts with current state of server.
+            res.send({
+                msg: 'Failed to register account. Username is already taken.',
+                error: error
+            })
+        })
 
         res.send({
             user: user,
@@ -22,7 +26,8 @@ router.post('/register', async function (req, res, next) {
         if (error.name === 'MongoError' && error.code === 11000) {
             res.status(409);    // 409 - Request conflicts with current state of server.
             res.send({
-                msg: 'Failed to create account. Username is already taken.'
+                msg: 'Failed to register account. Username is already taken.',
+                error: error
             })
         } else {
             next(error);
@@ -71,6 +76,28 @@ router.post('/logout', async function (req, res, next) {
                 });
             }
         });
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get('/loggedIn', async function (req, res, next) {
+    try {
+        if (req.session.username === undefined) {
+            res.send({
+                loggedIn: false
+            });
+        } else {
+            let user = await User.find({ username: req.session.username });
+            if (user === null) {
+                throw Error('Critical Error: A session username was not null and no user was found for that username.')
+            }
+
+            res.send({
+                loggedIn: true
+            })
+        }
+
     } catch (error) {
         next(error);
     }

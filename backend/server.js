@@ -6,7 +6,8 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-const routes = require('./routes/api');
+const authRoutes = require('./routes/api-auth');
+const targetRoutes = require('./routes/api-targets');
 
 // Initialization
 const app = express();
@@ -45,14 +46,29 @@ app.use(session({
 }))
 
 // Routes
-app.use('/api/', routes);       // Use the imported routes
+app.use('/api/', authRoutes);       // Use the imported routes
+app.use('/api/', targetRoutes);
 
-// Error Handler Middleware
-app.use(function(err, req, res, next){
-    //  Todo: More cases to provide accurate error messages
+/** Generic Error Handler Middleware
+ *  Catches all errors that aren't accounted for in the try-catch of routes and responds with a usable error message.
+ */
+app.use(function(error, req, res, next){
     res.status(422);
-    console.log(err);
-    res.send({error: err});
+    console.log(error)
+
+    // Mongo Errors
+    if (error.name === 'MongoError'){
+        res.send({
+            type: `MongoError: ${error.code}`,
+            error: error
+        });
+    }else{  
+        // Treat any other error as a JavaScript error
+        res.send({
+            msg: error.message,
+            error: JSON.stringify(err, Object.getOwnPropertyNames(error))
+        });
+    }
 });
 
 app.listen(process.env.PORT, function () {    // We need to listen to a port. 

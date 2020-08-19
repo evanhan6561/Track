@@ -39,8 +39,5 @@ function validDays(arr){
 // Create Model from the schema
 const Week = mongoose.model('week', WeekSchema);
 
-module.exports = {
-    Week: Week,
-    WeekSchema: WeekSchema
-}
+module.exports = Week;
 

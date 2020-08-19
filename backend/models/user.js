@@ -11,7 +11,7 @@ const TargetSchema = new Schema({
     weeks: {
         type: [Schema.Types.ObjectId],    // Not embedded, rather an array of ObjectID
         ref: 'Week'
-    }     
+    }
 })
 
 const UserSchema = new Schema({
