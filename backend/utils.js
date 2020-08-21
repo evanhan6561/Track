@@ -30,7 +30,7 @@ function epochToLocalSunday(epochMS, timeZone) {
  * @param {Date} d 
  * @return {Date} - Date object representing UTC Sunday with time 00:00:00
  */
-function mostRecentUTCSundayDate(d) {
+function mostRecentUTCSunday(d) {
     let temp = new Date(d);
     temp.setUTCDate(temp.getUTCDate() - temp.getUTCDay());
     temp.setUTCHours(0, 0, 0, 0);
@@ -39,20 +39,22 @@ function mostRecentUTCSundayDate(d) {
 
 
 function haveSameMostRecentUTCSunday(d1, d2) {
-    let d1Sunday = mostRecentUTCSundayDate(d1);
-    let d2Sunday = mostRecentUTCSundayDate(d2);
+    let d1Sunday = mostRecentUTCSunday(d1);
+    let d2Sunday = mostRecentUTCSunday(d2);
 
     // Sanity Check: make sure that d1Sunday and d2Sunday are actually sunday locally
-    if (d1Sunday.getDay() !== 0) {
+    if (d1Sunday.getUTCDay() !== 0) {
+        console.log('d1Sunday :>> ', d1Sunday);
         throw Error('Critical Error: d1Sunday is not a Sunday locally.');
     }
-    if (d2Sunday.getDay() !== 0) {
+    if (d2Sunday.getUTCDay() !== 0) {
+        console.log('d2Sunday :>> ', d2Sunday);
         throw Error('Critical Error: d2Sunday is not a Sunday locally.');
     }
 
-    let sameYear = d1Sunday.getFullYear() === d2Sunday.getFullYear();
-    let sameMonth = d1Sunday.getMonth() === d2Sunday.getMonth();
-    let sameDay = d1Sunday.getDate() === d2Sunday.getDate();
+    let sameYear = d1Sunday.getUTCFullYear() === d2Sunday.getUTCFullYear();
+    let sameMonth = d1Sunday.getUTCMonth() === d2Sunday.getUTCMonth();
+    let sameDay = d1Sunday.getUTCDate() === d2Sunday.getUTCDate();
     if (sameYear && sameMonth && sameDay) {
         return true;
     }
@@ -126,8 +128,15 @@ function localToSameDayUTC(d) {
     return newUTC;
 }
 
+// let d = new Date(2020, 7, 15);
+// let d2 = new Date();
+// let sunday = mostRecentUTCSunday(d2);
+// let sameSunday = haveSameMostRecentUTCSunday(d, sunday);
+// console.log('Local :>> ', d);
+// console.log('Sunday :>> ', sunday);
+// console.log('Same Sunday :>> ', sameSunday);
 
-// Bisect Like Behavior taken from Python's Bisect_Left source code:
+// Bisect Like Behavior taken from Python's Bisect_Left source code augmented with custom compare function:
 function bisectLeft(arr, item, lessThan) {
     let lo = 0;
     let hi = arr.length;
@@ -151,13 +160,15 @@ function testBisect() {
 
     let a = [1, 100];
     a = [1, 10, 50, 70, 100]
-    // a = [1]
-    let item = 110;
+    a = []
+    let item = 10;
 
     console.log('Insertion Point:', bisectLeft(a, item, lessThan))
     insert(a, item, lessThan);
     console.log('Post Insert:', a);
 }
+
+// testBisect()
 
 
 function insert(arr, item, comparator) {
@@ -172,6 +183,7 @@ module.exports = {
     parseLocalDateString: parseLocalDateString,
     parseUTCDateString: parseUTCDateString,
     localToSameDayUTC: localToSameDayUTC,
+    mostRecentUTCSunday: mostRecentUTCSunday,
     haveSameMostRecentUTCSunday: haveSameMostRecentUTCSunday,
     bisectLeft: bisectLeft
 }

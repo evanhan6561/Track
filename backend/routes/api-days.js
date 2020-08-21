@@ -5,13 +5,46 @@ const Week = require('../models/week');
 const fns = require('date-fns');
 const tz = require('date-fns-tz');
 
-const { epochToLocalSunday, printLocalAndUTC, printStartAndEndOfDay, localToSameDayUTC, bisectLeft, haveSameMostRecentUTCSunday } = require('../utils');
+const {
+    localToSameDayUTC,
+    bisectLeft,
+    haveSameMostRecentUTCSunday,
+    mostRecentUTCSunday
+} = require('../utils');
 // C R U D operations
 
 // Create Day - expects the ObjectId of a specified target.
+
+/**
+ * TLDR:
+ * Handles the user logging time worked towards a specific Target.
+ * If the user has never worked on a day before, a new one will be created. If the day already exists, we simply add the worktime
+ * to that day.
+ * 
+ * Adding a day can also generate a Week. A Week wraps up to 7 days and has the following structure:
+ *      Week = {
+ *          weeklyTargetTime: Number (in seconds)
+ *          days: [DaySchema]
+ *      }
+ * 
+ * A new week document will be added if the user has never added work to that week.
+ * 
+ * 
+ * Design Choice:
+ *  - If the user inserts time on 1/1/2020, then no matter what timezone they view the data, that time should be bound to 1/1/2020.
+ * 
+ * Implementation Details:
+ *  - Two weeks are considered equal if they have the same Sunday
+ *  - Ensure that Target.weeks is maintained in sorted order. (Ascending Time)
+ *  - All dates are stored as normalized UTC timestamps. (Normalized as in 0 time thru setHours(0, 0, 0, 0))
+ *  - All comparisons are done through the lens of UTC time.
+ *  - The day timestamps stored do not represent the exact time a User inserted workTime, 
+ *    they store the year/month/day a person inserts workTime.
+ */
 router.post('/days/:id', async function (req, res, next) {
     try {
         // Authorization Check - make sure the current session user owns this target.
+        let username = req.session.username;
         let targetId = req.params.id;
         let user = await User.findOne({ username: req.session.username });
         let target = user.targets.id(targetId);    // Returns 'null' if not found
@@ -23,42 +56,33 @@ router.post('/days/:id', async function (req, res, next) {
         // workTime - [seconds] time worked
         // timezone - String of user's local IANA timezone. Retrieved through 'console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)'
         let { inputDate, workTime, timeZone } = req.body;
+        let weeksIds = target.weeks;
 
-        /*
-        1. Check if a new 'Week' document should be constructed:
-             - If there exists a Week whose Sunday is the same as the input day, do not create a new Week.
+        // Convert the array of ObjectId's to an array of Documents
+        let populatedUser =
+            await User.findOne({ username: username }).populate({
+                path: 'targets',
+                populate: {
+                    path: 'weeks',
+                    model: 'week'
+                }
+            });
+        let weeks = populatedUser.targets.id(targetId).weeks;
 
-        Implementation:
-            -   Make sure that the 'weeks' array of ObjectId's of the specified 'target' is maintained in sorted order for binary search.
-            -   Find the Sunday of the input 'date' 
-            -   Use a function similar to Python's bisect module to find the index where that Sunday would be inserted.
-            -   If that index contains a Week with the same date, then we will be working with that Week.
-            -   Else we will insert create a new Week and append its ObjectId such that sorted order is maintained.
-
-        Design Choice:
-            - If a user deposits time on 1/31/2020, then no matter what timezone you view it from, it should always be in 1/31
-                - How?
-                    1. Take the Unix Timestamp and Timezone inputs to reconstruct local time w/ utcToZonedTime()
-                    2. Use this local time to construct a UTC Date object with matching year, month, day
-                    3. Store and send this UTC date object that is timezone independent.
-
-                - Downsides
-                    1. The year, month, date will be preserved, but everything else is kind of scrambled.
-        */
-        
-        // We have an array of ObjectId's. We can pull the desired documents by calling 'populate(collectionName)'
-        let weeksIDs = target.weeks;
-        let weeks = target.weeks.populate('week');
-
-        let localDate = tz.utcToZonedTime(inputDate, timeZone);
-
+        // Convert the input date into a normalized UTC date. (Normalized meaning that hours, mins, secs, ms are set to 0);
+        let localDate = tz.utcToZonedTime(new Date(inputDate), timeZone);
         let utcSameDay = localToSameDayUTC(localDate);
+
+        // Get the most recent UTC Sunday to perform a bisect operation on $weeks
         let utcSunday = mostRecentUTCSunday(utcSameDay);
-        // Check if any of the weeks have the same Sunday as utcSameDay
-        function weekLessThan(w1, w2){
-            // Get a Date object day from both weeks. The Date objects represents a single day.
-            let d1 = w1[0]
-            let d2 = w2[0]  
+        console.log('weeks :>> ', weeks);
+        
+
+        // Custom comparison function that bisectLeft will utilize.
+        function weekLessThan(w1, item) {
+            // Get a Date object day from w1. item is already a Date object.
+            let d1 = new Date(w1.days[0].date)
+            let d2 = item;
 
             // Get the most recent Sunday
             let sunday_1 = mostRecentUTCSunday(d1);
@@ -67,55 +91,137 @@ router.post('/days/:id', async function (req, res, next) {
             return sunday_1 < sunday_2;
         }
 
+        // Use bisectLeft to find the index we would insert a new week into such that sorted order is maintained.
         let weeksInsertionIndex = bisectLeft(weeks, utcSunday, weekLessThan);
-        if (weeksInsertionIndex >= weeks.length){
-            // Automatically insert a new week if the insertion point is out of bounds
+        console.log('weeksInsertionIndex :>> ', weeksInsertionIndex);
+
+        // We don't want two weeks for the same date range. 
+        // Check if the insertionIndex points to a week document with the same Sunday
+        if (weeksInsertionIndex >= weeks.length) {
+            // Don't check for duplicate week in this case or else we go out of bounds.
+            // If the insertionPoint is out of bounds, we can immediately create a new week and insert into Target.
             let newDay = {
                 workTime: workTime,
                 date: utcSameDay
             }
-            await Week.create({weeklyTargetTime: target.weeklyTargetTime, days: [newDay]})
-            arr.splice(weekInsertionIndex, 0, item);
+            let newWeek = await Week.create({ weeklyTargetTime: target.weeklyTargetTime, days: [newDay] })
+            weeksIds.splice(weeksInsertionIndex, 0, newWeek._id);
+            await user.save();
 
-        }else{
-            // We can safely compare for equality now
-            if (haveSameMostRecentUTCSunday(weeks[weeksInsertionIndex][0], utcSameDay)){
+            // Echo the updated Target to client
+            let updatedUser = await User.findOne({ username: req.session.username });
+            let updatedTarget = updatedUser.targets.id(targetId);
+            res.send({
+                msg: 'A new latest week has been inserted',
+                target: updatedTarget
+            })
+        } else {
+            // We can safely index into the $weeks array to check for equality
+            let potentialMatchDate = new Date((weeks[weeksInsertionIndex].days[0].date));
+            if (haveSameMostRecentUTCSunday(potentialMatchDate, utcSameDay)) {
+                // Case where we already have an existing week document that encompasses utcSameDay
                 let reusedWeek = weeks[weeksInsertionIndex];
-                
-                // Check if the reusedWeek has any days with the same day.
-                // If so, then add workTime to that day.
-                // Else, push a new Day object into the reused week.
+
+                // Iterate through all of the days within $reusedWeek to check if a Day subdoc already exists for $utcSameDay
                 let notContained = true;
-                for (let i = 0; i < reusedWeek.length; i++) {
-                    const day = reusedWeek[i];
-                    if (utcSameDay.getTime() === day.getTime()){
-                        day.workTime += workTime;
+                for (let i = 0; i < reusedWeek.days.length; i++) {
+                    let dayDocument = reusedWeek.days[i];
+                    let day = new Date(dayDocument.date);
+                    
+                    // If some Day subdoc is the same as utcSameDay, don't create a new Day subdoc, just add their workTimes
+                    if (utcSameDay.getTime() === day.getTime()) {
+                        dayDocument.workTime += workTime;
                         notContained = false;
                         break;
                     }
                 }
 
-                if (notContained){
+                // Append a new Day subdoc if none of the days in the $reusedWeek matched $utcSameDay
+                if (notContained) {
                     let newDay = {
                         workTime: workTime,
                         date: utcSameDay
                     }
-                    reusedWeek.push(newDay);
-                    reusedWeek.save();
+                    reusedWeek.days.push(newDay);
                 }
-            }else{
+                reusedWeek.save();
+
+                // Echo the changed Target
+                let updatedUser = await User.findOne({ username: req.session.username });
+                let updatedTarget = updatedUser.targets.id(targetId);
+                res.send({
+                    msg: 'Updated a week that already exists.',
+                    targets: updatedTarget
+                })
+            } else {
+                // Case where $weekInsertionPoint pointed to a week with a different date. We can safely insert a new week.
+                // Again, we are assuming that Target.weeks is in sorted order.
                 let newDay = {
                     workTime: workTime,
                     date: utcSameDay
                 }
-                await Week.create({weeklyTargetTime: target.weeklyTargetTime, days: [newDay]})
-                arr.splice(weekInsertionIndex, 0, item);
+                let newWeek = await Week.create({ weeklyTargetTime: target.weeklyTargetTime, days: [newDay] })
+                weeksIds.splice(weeksInsertionIndex, 0, newWeek._id);
+                await user.save();
+
+                // Echo the changed Target
+                let updatedUser = await User.findOne({ username: req.session.username });
+                let updatedTarget = updatedUser.targets.id(targetId);
+                res.send({
+                    msg: 'Inserted a new week within the array.',
+                    targets: updatedTarget
+                })
             }
         }
-
     } catch (error) {
         next(error);
     }
 });
 
+
+// Used for testing
+// TO BE DELETED
+router.post('/populate/:id', async function (req, res, next) {
+    try {
+        const { username } = req.body;
+        let targetId = req.params.id;
+        let user = await User.findOne({ username: username });
+        let targets = user.targets;
+        let target = targets.id(targetId);
+        let weeks = target.weeks;
+
+        // This works
+        let population =
+            await User.findOne({ username: username }).populate({
+                path: 'targets',
+                populate: {
+                    path: 'weeks',
+                    model: 'week'
+                }
+            })
+
+
+        // .exec(function(err, docs){
+        //     if (err){
+        //         throw err
+        //     }
+        //     // console.log('docs :>> ', docs);
+        //     console.log('weeks:', docs.targets[0].weeks)
+        //     return docs;
+        // })
+        let targetedWeeks = population.targets.id(targetId).weeks
+        console.log('Targeted Weeks:', targetedWeeks);
+        console.log('population :>> ', population);
+
+        // let populatedWeek = pop  
+
+
+        res.send({
+            target: target,
+            weeks: weeks
+        })
+    } catch (error) {
+        next(error);
+    }
+});
 module.exports = router;

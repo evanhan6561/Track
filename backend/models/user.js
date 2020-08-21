@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const Week = require('./week');
 
 const TargetSchema = new Schema({
     title: {
@@ -8,10 +9,10 @@ const TargetSchema = new Schema({
     },
     notes: String,
     weeklyTargetTime: Number,
-    weeks: {
-        type: [Schema.Types.ObjectId],    // Not embedded, rather an array of ObjectID
-        ref: 'Week'
-    }
+    weeks: [{
+        type: Schema.Types.ObjectId,    // Not embedded, rather an array of ObjectID
+        ref: 'week' 
+    }]
 })
 
 const UserSchema = new Schema({
