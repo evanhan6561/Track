@@ -8,6 +8,8 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/api-auth');
 const targetRoutes = require('./routes/api-targets');
+const dayRoutes = require('./routes/api-days');
+const utilRoutes = require('./routes/api-util');
 
 // Initialization
 const app = express();
@@ -48,6 +50,8 @@ app.use(session({
 // Routes
 app.use('/api/', authRoutes);       // Use the imported routes
 app.use('/api/', targetRoutes);
+app.use('/api/', dayRoutes);
+app.use('/api/', utilRoutes);
 
 /** Generic Error Handler Middleware
  *  Catches all errors that aren't accounted for in the try-catch of routes and responds with a usable error message.
@@ -66,7 +70,7 @@ app.use(function(error, req, res, next){
         // Treat any other error as a JavaScript error
         res.send({
             msg: error.message,
-            error: JSON.stringify(err, Object.getOwnPropertyNames(error))
+            error: JSON.stringify(error, Object.getOwnPropertyNames(error))
         });
     }
 });
