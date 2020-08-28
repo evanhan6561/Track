@@ -2,16 +2,16 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Day from './Day';
 import '../css/Week.css'
-import {getMonth} from '../utils';
+import { getMonth } from '../utils';
 
 const daysInWeek = 7;
 
-const Week = ({ sunday, viewedMonth, weeksToDisplay }) => {
+const Week = ({ setTargets, currentTarget, setCurrentTarget, workWeek, sunday, viewedMonth, weeksToDisplay }) => {
     let weekStyle = {
         height: '' + (100 / weeksToDisplay) + '%'
     }
 
-
+    // No workWeek logic
     let dayDates = [];
     let dayOfWeek = new Date(sunday);
     for (let i = 0; i < daysInWeek; i++) {
@@ -21,19 +21,41 @@ const Week = ({ sunday, viewedMonth, weeksToDisplay }) => {
 
     let dayComponents = dayDates.map(date => {
         // Check if the date is within the viewedMonth or not to apply styling
-        if (getMonth(date) === viewedMonth) {
-            return (
-                <Day day={date} key={uuidv4()} inMonth={true} />
-            )
-        }else{
-            return (
-                <Day day={date} key={uuidv4()} inMonth={false}/>
-            )
+        let extra = {
+            inMonth: false,
+            workDay: null
         }
+
+        // Whether or not to apply grayed out styling for out of month days
+        if (getMonth(date) === viewedMonth) {
+            extra.inMonth = true;
+        }
+
+        // Perform O(n^2) comparisons. Should be ok, n <= 7.
+        // Yes workWeek logic
+        if (workWeek) {
+            // Construct an array parallel to workWeek.days of just the dates.
+            let workDays = workWeek.days.map(day => {
+                return new Date(day.date);
+            });
+
+            for (let i = 0; i < workDays.length; i++) {
+                const workDay = workDays[i];
+                let sameYear = workDay.getUTCFullYear() === date.getFullYear();
+                let sameMonth = workDay.getUTCMonth() === date.getMonth();
+                let sameDay = workDay.getUTCDate() === date.getDate();
+
+                if (sameYear && sameMonth && sameDay){
+                    extra.workDay = workWeek.days[i];   // Pass in the API date object, not just the date.
+                    break;
+                }
+            }
+        }
+        return <Day setTargets={setTargets} currentTarget={currentTarget} setCurrentTarget={setCurrentTarget} day={date} key={uuidv4()} {...extra} />;
     })
 
     return (
-        
+
         <tr className='week' style={weekStyle}>
             {dayComponents}
         </tr>

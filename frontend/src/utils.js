@@ -1,8 +1,76 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
-export function numToMonth(n){
+/**
+ * Returns a Date object that is at the most recent UTC sunday with zeroed time.
+ * @param {Date} d 
+ * @return {Date} - Date object representing UTC Sunday with time 00:00:00
+ */
+export function mostRecentUTCSunday(d) {
+    let temp = new Date(d);
+    temp.setUTCDate(temp.getUTCDate() - temp.getUTCDay());
+    temp.setUTCHours(0, 0, 0, 0);
+    return temp;
+}
+
+export function localToSameDayUTC(d) {
+    let [year, month, day] = parseLocalDateString(d);
+
+    // Copy Date
+    let newUTC = new Date();
+    newUTC.setUTCFullYear(year);
+    newUTC.setUTCMonth(month - 1);  // Months are 0-11 for Date objects but 1-12 irl.
+    newUTC.setUTCDate(day);
+
+    // Zero Time
+    newUTC.setUTCHours(0, 0, 0, 0);
+    return newUTC;
+}
+
+/** Returns the Month, Day, Year of local time as an array
+ * @param {Date} d - A date initialized to some timezone through utcToZonedTime(),
+ * @return {[Year, Month, Day]} 
+ */
+function parseLocalDateString(d) {
+    return [d.getFullYear(), d.getMonth() + 1, d.getDate()];
+}
+
+export function bisectLeft(arr, item, lessThan) {
+    let lo = 0;
+    let hi = arr.length;
+
+    while (lo < hi) {
+        let mid = (lo + hi) >> 1;
+        if (lessThan(arr[mid], item)) {
+            lo = mid + 1;
+        } else {
+            hi = mid
+        }
+    }
+    return lo
+}
+
+// Can't use hooks like 'useFetch' within function calls. This is a normal fetch.
+export async function fetchCall(url, extraOptions = {}) {
+    try {
+        // Initialize Fetch Options
+        let defaultOptions = {
+            credentials: 'include'
+        }
+        let options = Object.assign(defaultOptions, extraOptions);
+
+        // Make the fetch call
+        const response = await fetch(url, options);
+        const respJSON = await response.json();
+        return respJSON;
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+}
+
+export function numToMonth(n) {
     let month;
-    switch(n){
+    switch (n) {
         case 1:
             month = 'January';
             break;
@@ -51,7 +119,7 @@ export function numToMonth(n){
  * @param {Date} d - date whose month is to be extracted
  * @returns {Number} An integer from 1 - 12
  */
-export function getMonth(d){
+export function getMonth(d) {
     return d.getMonth() + 1;
 }
 

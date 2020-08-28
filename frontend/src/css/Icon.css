@@ -1,0 +1,5 @@
+/* Central CSS file for all icon specific styling */
+
+.icon:hover{
+    cursor: pointer;
+}

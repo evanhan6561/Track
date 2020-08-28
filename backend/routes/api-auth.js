@@ -10,17 +10,12 @@ router.post('/register', async function (req, res, next) {
         let hash = await bcrypt.hash(password, saltRounds);
 
         // Error handling in an async call with a callback is a bit tricky. Throwing an error in the callback doesn't work.
-        let user = await User.create({ username: username, password: hash }).then(() => {
-            res.status(409);    // 409 - Request conflicts with current state of server.
-            res.send({
-                msg: 'Failed to register account. Username is already taken.',
-                error: error
-            })
-        })
+        let user = await User.create({ username: username, password: hash });
 
         res.send({
             user: user,
-            msg: 'Successfully registered an account.'
+            msg: 'Successfully registered an account.',
+            success: true
         });
     } catch (error) {
         if (error.name === 'MongoError' && error.code === 11000) {
@@ -40,6 +35,7 @@ router.post('/login', async function (req, res, next) {
         const { username, password } = req.body;
         let user = await User.findOne({ username: username });        // No duplicate usernames
         if (user === null) {
+            console.log('req.body :>> ', req.body);
             throw new Error('Username or password was incorrect.');
         }
 
@@ -72,7 +68,8 @@ router.post('/logout', async function (req, res, next) {
                 throw new Error('Failed to destroy session.');
             } else {
                 res.send({
-                    msg: 'Successfully Logged Out.'
+                    msg: 'Successfully Logged Out.',
+                    success: true
                 });
             }
         });

@@ -19,7 +19,7 @@ const TimerDisplay = () => {
 
     return (
         <div className='timer-display-wrapper'>
-            <div>Timers:</div>
+            <h5>Timers:</h5>
             <div className='timer-content-wrapper'>
                 <ul className='timer-list'>
                     <li>

@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const DaySchema = new Schema({
     workTime: {
         type: Number,
+        validate: {validator: isPositiveInt, msg: 'workTime must be a positive integer'},
         required: [true, 'Work Time is required to create a Day.']
     },
     date: {
@@ -27,6 +28,10 @@ const WeekSchema = new Schema({
         validate: weekValidators
     }
 });
+
+function isPositiveInt(n){
+    return n > 0 && Number.isInteger(n);
+}
 
 function isNotEmpty(arr){
     return arr.length > 0;

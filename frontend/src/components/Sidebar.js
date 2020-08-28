@@ -1,21 +1,24 @@
 import React from 'react';
+
 import '../css/Sidebar.css'
 import TimerDisplay from './TimerDisplay';
-const Sidebar = () => {
+import TargetSelect from './TargetSelect';
+
+const Sidebar = ({ currentTarget, setCurrentTarget, targets, setTargets }) => {
     return (
         <aside>
             <div className='goals-wrapper'>
-                <div className='goals-header'>
-                    Goals:
-                </div>
-                <ul className='goals-list'>
-                    <li>Run</li>
-                </ul>
+                {/* Todo: delete goals-header Only meant for debugging purposes. */}
+
+                <div>Active View: {currentTarget ? currentTarget.title : 'None'}</div>
+
+
+                <TargetSelect currentTarget={currentTarget} setCurrentTarget={setCurrentTarget} targets={targets} setTargets={setTargets}/>
             </div>
-            
+
             <TimerDisplay />
         </aside>
     );
 }
- 
+
 export default Sidebar;

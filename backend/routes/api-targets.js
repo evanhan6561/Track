@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Week = require('../models/week');
+const mongoose = require('mongoose');
 
 // C R U D Operations
 
@@ -11,22 +12,27 @@ router.post('/targets', async function (req, res, next) {
         let { title, notes, weeklyTargetTime } = req.body;
         // Todo: Filter Input
 
-        let user = await User.findOne({ username: req.session.username });
+
+        // Generate the _id manually so we know what it is
         let newTarget = {
+            _id: mongoose.Types.ObjectId(),
             title: title,
             notes: notes,
             weeklyTargetTime: weeklyTargetTime, // Presumed to be seconds. The client should handle the unit conversions.
             weeks: []
         }
 
+        let user = await User.findOne({ username: req.session.username });
         let targets = user.targets;
         targets.push(newTarget);
         await user.save();
 
-        let updatedTargets = await User.findOne({ username: req.session.username }).targets;
+        let updatedUser = await User.findOne({ username: req.session.username });
+        let updatedTarget = updatedUser.targets.id(newTarget._id);
         res.send({
             msg: 'Target successfully uploaded',
-            targets: updatedTargets
+            success: true,
+            target: updatedTarget
         });
     } catch (error) {
         next(error);
@@ -36,9 +42,21 @@ router.post('/targets', async function (req, res, next) {
 // Read
 router.get('/targets', async function (req, res, next) {
     try {
-        let user = await User.findOne({ username: req.session.username });
+        // Make sure to first populate the references and then send off the data.
+        let populatedUser =
+            await User.findOne({ username: req.session.username }).populate({
+                path: 'targets',
+                populate: {
+                    path: 'weeks',
+                    model: 'week'
+                }
+            });
+
+        let user = await User.findOne({username: req.session.username})
+
+
         res.send({
-            targets: user.targets
+            targets: populatedUser.targets
         });
     } catch (error) {
         next(error);
@@ -66,6 +84,7 @@ router.put('/targets/:id', async function (req, res, next) {
 
         res.send({
             msg: 'Successfully updated the target.',
+            success: true,
             target: updatedTarget
         })
     } catch (error) {
@@ -107,6 +126,7 @@ router.delete('/targets/:id', async function (req, res, next) {
         let updatedTargets = await User.findOne({ username: req.session.username }).targets;
         res.send({
             msg: 'Successfully deleted target.',
+            success: true,
             targets: updatedTargets
         });
     } catch (error) {

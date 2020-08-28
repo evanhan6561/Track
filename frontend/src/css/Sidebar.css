@@ -14,8 +14,3 @@ aside{
 .goals-wrapper, .timer-display-wrapper{
     max-height: 50%;
 }
-
-.goals-list{
-    list-style-type: none;
-    padding-left: 1em;
-}
