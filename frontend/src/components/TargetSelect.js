@@ -56,7 +56,6 @@ const TargetSelect = ({ currentTarget, setCurrentTarget, targets, setTargets }) 
         }
 
         let checkboxes = targets.map((target, index) => {
-            // By default, check the first target
             let defaultProps = {
                 key: uuidv4(),
                 type: 'radio',
@@ -97,7 +96,7 @@ const TargetSelect = ({ currentTarget, setCurrentTarget, targets, setTargets }) 
         })
 
         return combined;
-    }, [selectTarget, setTargets])
+    }, [selectTarget, setTargets, currentTarget])
 
     // const checkboxes = generateJSX(targets);
 

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import { Form, Button } from 'react-bootstrap';
 
 /**
  * Returns a reusable input that makes use of input:text rather than input:number to ensure that users can only enter
@@ -7,8 +8,6 @@ import React, {useState} from 'react';
  * Empty inputs will return NaN
  * 
  * @param {Object} settings - An object containing the mandatory data to construct the input HTML
- * @param {String} settings.label - Contents of the <label> tag
- * @param {String} settings.name - Name of the variable you're tracking
  */
 function usePositiveIntegerInput(settings){
     const [intString, setIntString] = useState('');
@@ -30,10 +29,11 @@ function usePositiveIntegerInput(settings){
     }
 
     let inputHTML = (
-        <>
-            <label htmlFor={`integer-input-${settings.label}`}>{settings.label}</label><br/>
-            <input value={intString} onChange={handleChange} type="text" name={settings.name} id={`integer-input-${settings.label}`}/>
-        </>
+        // <Form.Group controlId={`integer-input-${settings.label}`}>
+        //     <Form.Label>{settings.label}</Form.Label>
+        //     <Form.Control type="text" value={intString} onChange={handleChange}/>
+        // </Form.Group>
+        <Form.Control type="text" value={intString} onChange={handleChange} placeholder={settings.placeholder}/>
     )
     
     // A blank input returns NaN, make sure to account for that

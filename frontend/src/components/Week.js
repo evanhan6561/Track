@@ -6,9 +6,19 @@ import { getMonth } from '../utils';
 
 const daysInWeek = 7;
 
-const Week = ({ setTargets, currentTarget, setCurrentTarget, workWeek, sunday, viewedMonth, weeksToDisplay }) => {
+const Week = ({ setTargets, currentTarget, setCurrentTarget, workWeek, sunday, viewedMonth, weeksToDisplay, isCompleted }) => {
     let weekStyle = {
         height: '' + (100 / weeksToDisplay) + '%'
+    }
+    if (isCompleted){
+        weekStyle.borderLeft = '5px solid rgba(226, 194, 255, 1)'
+        // weekStyle.borderTop = '5px solid rgba(226, 194, 255, 1)'
+        // weekStyle.borderBottom = '5px solid rgba(226, 194, 255, 1)'
+        // weekStyle.borderRight = '5px solid rgba(226, 194, 255, 1)'
+
+        weekStyle.backgroundColor = '#A1F7E9'
+        weekStyle.backgroundColor = 'rgba(161, 247, 233, 0.5)'
+        weekStyle.zIndex = '10';
     }
 
     // No workWeek logic

@@ -15,6 +15,8 @@ const Weeks = ({ setTargets, currentTarget, setCurrentTarget, date, viewedMonth 
     // Inject the work days of currentTarget if they occur within the current view.
     // Rerender weeks component if the currentTarget/date changes.
     useEffect(() => {
+        // Todo: Bug within this function. Does not include the last week.
+
         if (currentTarget) {
             // Use bisectLeft to perform binary search to find the starting position.
             function lessThan(week, firstSunday) {
@@ -24,6 +26,12 @@ const Weeks = ({ setTargets, currentTarget, setCurrentTarget, date, viewedMonth 
 
                 return sundayOfWeek < firstSunday;
             }
+
+            
+            let pureDates = currentTarget.weeks.map(week => {
+                return week.days[0].date;
+            })
+            console.log('currentTarget.weeks Dates :>> ', pureDates);
 
             // Assumption: if 1/31/2020 in UTC is a Sunday, 1/31/2020 is a Sunday in all local timezones
             let weeks = currentTarget.weeks;
@@ -40,7 +48,8 @@ const Weeks = ({ setTargets, currentTarget, setCurrentTarget, date, viewedMonth 
             // Otherwise check if weeks[i] contains day(s) that fall into the current view
             let workWeeksInView = [];
             let currentIndex = startIndex;
-            let lastSunday = new Date(firstSunday.getFullYear(), firstSunday.getMonth(), firstSunday.getDate() + ((WEEKS_TO_DISPLAY - 1) * 7));
+            let lastSunday = new Date(firstSunday.getFullYear(), firstSunday.getMonth(), firstSunday.getDate());
+            lastSunday.setDate(lastSunday.getDate() + ((WEEKS_TO_DISPLAY) * 7));
             lastSunday = mostRecentUTCSunday(localToSameDayUTC(lastSunday));     // Normalize local -> UTC
 
             // Sanity Check: Is lastSundayNormalized actually a UTC Sunday?
@@ -82,12 +91,15 @@ const Weeks = ({ setTargets, currentTarget, setCurrentTarget, date, viewedMonth 
 
     for (let i = 0; i < WEEKS_TO_DISPLAY; i++) {
         sundayDates.push(sunday);
-        sunday = new Date(sunday.getFullYear(), sunday.getMonth(), sunday.getDate() + 7);
+
+        let copy = new Date(sunday);
+        copy.setDate(copy.getDate() + 7);
+        sunday = copy;
     }
 
     // Work Week injection. Iterating over two arrays: workWeeks and sundayDates.
     let weekComponents = [];
-    let j = 0;
+    let j = 0;      // Pointer for indexing workWeeks
     for (let i = 0; i < sundayDates.length; i++) {
         const calendarSunday = sundayDates[i];
         let defaultProps = {
@@ -106,8 +118,24 @@ const Weeks = ({ setTargets, currentTarget, setCurrentTarget, date, viewedMonth 
             let calendarSundayUTC = localToSameDayUTC(calendarSunday);
 
             if (workWeekUTCSunday.getTime() === calendarSundayUTC.getTime()) {
+                // Accumulate all the workTime in a workWeek to see if we should apply completion styling
+                let completionCutoff = workWeek.weeklyTargetTime * 60 * 60; // hr -> seconds
+                let totalWorkTime = workWeek.days.reduce((sum, currentDayDoc) => {
+                    let currentWorkTime = currentDayDoc.workTime;
+                    return sum + currentWorkTime;
+                }, 0);
+
+
+                // custom styling on week completion
+                let isCompleted = false;
+                if (totalWorkTime > completionCutoff){
+                    console.log('Cutoff met');
+                    isCompleted = true;
+                }
+
+                console.log('In workWeek injection', completionCutoff, totalWorkTime);
                 weekComponents.push(
-                    <Week workWeek={workWeek} {...defaultProps} />
+                    <Week workWeek={workWeek} {...defaultProps} isCompleted={isCompleted}/>
                 )
                 j++;
             }else{

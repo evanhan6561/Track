@@ -16,7 +16,7 @@ const Sidebar = ({ currentTarget, setCurrentTarget, targets, setTargets }) => {
                 <TargetSelect currentTarget={currentTarget} setCurrentTarget={setCurrentTarget} targets={targets} setTargets={setTargets}/>
             </div>
 
-            <TimerDisplay />
+            <TimerDisplay targets={targets} setTargets={setTargets} setCurrentTarget={setCurrentTarget} currentTarget={currentTarget}/>
         </aside>
     );
 }

@@ -1,7 +1,8 @@
-import React, {useReducer} from 'react';
+import React, {useReducer, useState} from 'react';
 import '../css/TimerDisplay.css'
 import Stopwatch from './Stopwatch';
 import PomodoroTimer from './PomodoroTimer';
+import TimerTargetSelect from './TimerTargetSelect';
 
 const timerReducer = (state, action) => {
     switch(action.type){
@@ -14,8 +15,15 @@ const timerReducer = (state, action) => {
     }
 }
 
-const TimerDisplay = () => {
+const TimerDisplay = ({targets, setTargets, currentTarget, setCurrentTarget}) => {
     const [timer, dispatch] = useReducer(timerReducer, 'Pomodoro');
+    const [selectedTimerTargetId, setSelectedTimerTargetId] = useState(null);
+
+    if (selectedTimerTargetId === null){
+        if (targets && targets.length > 0){
+            setSelectedTimerTargetId(targets[0]._id);
+        }
+    }
 
     return (
         <div className='timer-display-wrapper'>
@@ -30,9 +38,10 @@ const TimerDisplay = () => {
                     </li>
                 </ul>
                 <div className='timer-display'>
+                    <TimerTargetSelect targets={targets} selectedTimerTargetId={selectedTimerTargetId} setSelectedTimerTargetId={setSelectedTimerTargetId}/>
                     <div className='timer-current'>{timer}</div>
-                    <PomodoroTimer timer={timer}/>
-                    <Stopwatch timer={timer}/>
+                    <PomodoroTimer selectedTimerTargetId={selectedTimerTargetId} selectedTar setTargets={setTargets} currentTarget={currentTarget} setCurrentTarget={setCurrentTarget} timer={timer}/>
+                    <Stopwatch selectedTimerTargetId={selectedTimerTargetId} setTargets={setTargets} currentTarget={currentTarget} setCurrentTarget={setCurrentTarget} timer={timer}/>
                 </div>
             </div>            
         </div>

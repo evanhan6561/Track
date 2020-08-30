@@ -41,6 +41,28 @@ const {
  *    they only store the year/month/day a person inserts workTime.
  */
 router.post('/days/:id', async function (req, res, next) {
+    /**Returns a target document whose array of ObjectId references to Week documents have been populated.
+     * 
+     * @param {*} username - username of the current user
+     * @param {*} targetId - ObjectId of the target to return
+     */
+    async function getPopulatedTarget(username, targetId) {
+        // Echo the changed Target
+        let updatedUser =
+            await User.findOne({ username: username }).populate({
+                path: 'targets',
+                populate: {
+                    path: 'weeks',
+                    model: 'week'
+                }
+            });
+        let updatedTarget = updatedUser.targets.id(targetId);
+        return updatedTarget;
+    }
+
+
+    // Todo: Deleting a week and then inserting into it causes sorted order to no longer be maintained
+
     try {
         // Authorization Check - make sure the current session user owns this target.
         let username = req.session.username;
@@ -70,14 +92,17 @@ router.post('/days/:id', async function (req, res, next) {
             });
         let weeks = populatedUser.targets.id(targetId).weeks;
 
+        // Sanity Check:
+        if (weeksIds.length !== weeks.length){
+            throw Error('Critical Error: The length of ObjectIds in target.weeks is not equal to the length of populated target.weeks');
+        }
+
         // Convert the input date into a normalized UTC date. (Normalized meaning that hours, mins, secs, ms are set to 0);
         let localDate = tz.utcToZonedTime(new Date(inputDate), timeZone);
         let utcSameDay = localToSameDayUTC(localDate);
 
         // Get the most recent UTC Sunday to perform a bisect operation on $weeks
         let utcSunday = mostRecentUTCSunday(utcSameDay);
-        console.log('weeks :>> ', weeks);
-
 
         // Custom comparison function that bisectLeft will utilize.
         function weekLessThan(w1, item) {
@@ -95,6 +120,14 @@ router.post('/days/:id', async function (req, res, next) {
         // Use bisectLeft to find the index we would insert a new week into such that sorted order is maintained.
         let weeksInsertionIndex = bisectLeft(weeks, utcSunday, weekLessThan);
         console.log('weeksInsertionIndex :>> ', weeksInsertionIndex);
+
+
+        let pureDates = weeks.map(week => {
+            return week.days[0].date;
+        })
+        console.log('The Dates of this target Pre-insertion:>> ', pureDates);
+
+
 
         // We don't want two weeks for the same date range. 
         // Check if the insertionIndex points to a week document with the same Sunday
@@ -133,7 +166,8 @@ router.post('/days/:id', async function (req, res, next) {
                 let reusedWeek = weeks[weeksInsertionIndex];
 
                 // Iterate through all of the days within $reusedWeek to check if a Day subdoc already exists for $utcSameDay
-                let notContained = true;
+                let notContained = true;    // Todo: delete notContained if code works
+                let existingDayDocument = null;
                 for (let i = 0; i < reusedWeek.days.length; i++) {
                     let dayDocument = reusedWeek.days[i];
                     let day = new Date(dayDocument.date);
@@ -142,35 +176,121 @@ router.post('/days/:id', async function (req, res, next) {
                     if (utcSameDay.getTime() === day.getTime()) {
                         dayDocument.workTime += workTime;
                         notContained = false;
+                        existingDayDocument = dayDocument;
                         break;
                     }
                 }
 
-                // Append a new Day subdoc if none of the days in the $reusedWeek matched $utcSameDay
-                if (notContained) {
+                // If we have a Day that already exists, we may want to either delete it if its new time is <= 0
+                // or merely update it otherwise
+                if (existingDayDocument) {
+                    // If the workTime is <= 0, then delete the day and potentially the parent week
+                    if (existingDayDocument.workTime <= 0) {
+                        if (reusedWeek.days.length === 1) {
+                            // Parent week has length 1, delete the entire week and delete it's reference from Target.weeks
+
+                            // Delete the Week ObjectId reference from Target.weeks. 
+                            let weekId = reusedWeek._id;                        // this does not work.
+                            console.log('weekId :>> ', weekId);
+                            for (let i = 0; i < target.weeks.length; i++) {
+                                const id = target.weeks[i];
+                                console.log('id :>> ', id);
+                                if (id.equals(weekId)) {
+                                    target.weeks.splice(i, 1);
+                                    console.log('Deleted a weekId');
+                                    break;
+                                }
+                            }
+                            await user.save();
+
+                            // Delete the week
+                            await Week.findByIdAndDelete(weekId);
+
+                            // Echo the updated Target and informative message.
+                            let updatedTarget = await getPopulatedTarget(username, targetId);
+                            let msg = `Successfully deleted day and week. 
+                            A Week containing only a single work day had an updated time <= 0.
+                            `;
+                            msg = msg.replace(/\s\s+/g, ' ');   // Convert prolonged whitespace -> single space
+                            res.send({
+                                msg: msg,
+                                success: true,
+                                target: updatedTarget
+                            });
+                        } else {
+                            // Delete a specific day from a week
+                            let dayId = existingDayDocument._id;
+                            reusedWeek.days.id(dayId).remove();
+                            await reusedWeek.save();
+                            let updatedTarget = await getPopulatedTarget(username, targetId);
+                            res.send({
+                                msg: 'Successfully deleted a single Day from a Week.',
+                                success: true,
+                                target: updatedTarget
+                            });
+                        }
+                    } else {
+                        // Otherwise, our Day has a valid workTime > 0. Just save the changes.
+                        reusedWeek.save();
+                        let updatedTarget = await getPopulatedTarget(username, targetId);
+                        res.send({
+                            msg: 'Changed the workTime of an existing day.',
+                            success: true,
+                            target: updatedTarget
+                        })
+                    }
+                } else {
+                    // No Day exists with a matching date. We'll need to push a new Day.
                     let newDay = {
                         workTime: workTime,
                         date: utcSameDay
                     }
                     reusedWeek.days.push(newDay);
-                }
-                reusedWeek.save();
+                    reusedWeek.save();
 
-                // Echo the changed Target
-                let updatedUser =
-                    await User.findOne({ username: req.session.username }).populate({
-                        path: 'targets',
-                        populate: {
-                            path: 'weeks',
-                            model: 'week'
-                        }
-                    });
-                let updatedTarget = updatedUser.targets.id(targetId);
-                res.send({
-                    msg: 'Updated a week that already exists.',
-                    success: true,
-                    target: updatedTarget
-                })
+                    // Echo the changed Target, make sure it's populated
+                    let updatedUser =
+                        await User.findOne({ username: req.session.username }).populate({
+                            path: 'targets',
+                            populate: {
+                                path: 'weeks',
+                                model: 'week'
+                            }
+                        });
+                    let updatedTarget = updatedUser.targets.id(targetId);
+                    res.send({
+                        msg: 'Updated a week that already exists.',
+                        success: true,
+                        target: updatedTarget
+                    })
+                }
+
+                // Old code that worked, delete if new code works.
+                // // Append a new Day subdoc if none of the days in the $reusedWeek matched $utcSameDay
+                // if (notContained) {
+                //     let newDay = {
+                //         workTime: workTime,
+                //         date: utcSameDay
+                //     }
+                //     reusedWeek.days.push(newDay);
+                // }
+                // reusedWeek.save();
+
+                // // Echo the changed Target
+                // let updatedUser =
+                //     await User.findOne({ username: req.session.username }).populate({
+                //         path: 'targets',
+                //         populate: {
+                //             path: 'weeks',
+                //             model: 'week'
+                //         }
+                //     });
+                // let updatedTarget = updatedUser.targets.id(targetId);
+                // res.send({
+                //     msg: 'Updated a week that already exists.',
+                //     success: true,
+                //     target: updatedTarget
+                // })
             } else {
                 // Case where $weekInsertionPoint pointed to a week with a different date. We can safely insert a new week.
                 // Again, we are assuming that Target.weeks is in sorted order.
@@ -323,7 +443,7 @@ router.delete('/days/:targetId/:weekId/:dayId', async function (req, res, next) 
                 console.log('target.weeks :>> ', typeof (target.weeks[0]));
                 for (let i = 0; i < target.weeks.length; i++) {
                     const id = target.weeks[i];
-                    if (id == weekId) {
+                    if (id.equals(weekId)) {
                         target.weeks.splice(i, 1);
                         break;
                     }

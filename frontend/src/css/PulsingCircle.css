@@ -1,0 +1,30 @@
+/* Taken from Florin Pop - https://www.youtube.com/watch?v=zSHCi12hz9o */
+
+.pulsing-circle {
+	background-color: rgba(226, 194, 255, .6);
+	border-radius: 50%;
+	animation: pulse 3.5s infinite;
+	height: 40px;
+    width: 40px;
+    position: absolute;
+    bottom: -20px;
+    left: -20px;
+}
+
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.9);
+		box-shadow: 0 0 0 0 rgba(226, 194, 255, 0.7);
+	}
+	
+	70% {
+		transform: scale(1);
+		box-shadow: 0 0 0 10px rgba(226, 194, 255, 0);
+	}
+	
+	100% {
+		transform: scale(0.9);
+		box-shadow: 0 0 0 0 rgba(226, 194, 255, 0);
+	}
+}

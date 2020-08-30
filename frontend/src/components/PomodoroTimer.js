@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import CustomPomodoroForm from './CustomPomodoroForm';
+import { fetchCall } from '../utils';
 
-const PomodoroTimer = ({ timer }) => {
+const PomodoroTimer = ({ setTargets, currentTarget, setCurrentTarget, timer, selectedTimerTargetId }) => {
     let timerStyle = { display: 'none' };
     if (timer === 'Pomodoro') {
         timerStyle = { display: 'block' }
@@ -23,9 +24,50 @@ const PomodoroTimer = ({ timer }) => {
 
     // On timer completion, toggle workMode, reset time, pause
     useEffect(() => {
+        const addTimeToAPI = async () => {
+            if (selectedTimerTargetId) {
+                // Add worktime to Today through API
+                let url = process.env.REACT_APP_API_HOST + '/api/days/' + selectedTimerTargetId;
+                let secondsWorked = Math.floor(startingWorkCentiseconds / 10);
+                let data = JSON.stringify({
+                    inputDate: Date.now(),
+                    workTime: secondsWorked,
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                });
+                let options = {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body:  data
+                };
+                let response = await fetchCall(url, options);
+                if (response.success){
+                    // Update local state: target and currentTarget.
+                    let updatedTarget = response.target;
+                    setTargets( targets => {
+                        let copy = targets.map( target => {
+                            if (target._id === updatedTarget._id){
+                                return updatedTarget;
+                            }else{
+                                return target;
+                            }
+                        });
+                        return copy;
+                    });
+
+                    // Shift focus onto the Target one has just added time to
+                    setCurrentTarget(updatedTarget);
+
+                }else{
+                    // Todo: Responsive Error Message to User
+                }
+            }
+        }
+
         if (centiseconds === 0) {
             if (isWorkMode) {
+                addTimeToAPI();
                 setCentiseconds(startingRestCentiseconds);
+
             } else {
                 setCentiseconds(startingWorkCentiseconds);
             }
@@ -33,7 +75,7 @@ const PomodoroTimer = ({ timer }) => {
             setIsWorkMode(!isWorkMode);
             setTicking(false);
         }
-    }, [centiseconds, isWorkMode, startingRestCentiseconds, startingWorkCentiseconds]);
+    }, [centiseconds, isWorkMode, startingRestCentiseconds, startingWorkCentiseconds, setTargets, currentTarget, setCurrentTarget, selectedTimerTargetId]);
 
     // Tick if "ticking = true"
     useEffect(() => {
@@ -101,8 +143,8 @@ const PomodoroTimer = ({ timer }) => {
                 <input type='button' onClick={startStop} value={ticking ? 'Stop' : 'Start'} />
                 <input type='button' onClick={reset} value='Reset' />
             </div>
-            <CustomPomodoroForm 
-                setStartingWorkCentiseconds={setStartingWorkCentiseconds} 
+            <CustomPomodoroForm
+                setStartingWorkCentiseconds={setStartingWorkCentiseconds}
                 setStartingRestCentiseconds={setStartingRestCentiseconds}
             />
         </div>
