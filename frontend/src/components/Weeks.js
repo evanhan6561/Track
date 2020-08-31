@@ -129,11 +129,9 @@ const Weeks = ({ setTargets, currentTarget, setCurrentTarget, date, viewedMonth 
                 // custom styling on week completion
                 let isCompleted = false;
                 if (totalWorkTime > completionCutoff){
-                    console.log('Cutoff met');
                     isCompleted = true;
                 }
 
-                console.log('In workWeek injection', completionCutoff, totalWorkTime);
                 weekComponents.push(
                     <Week workWeek={workWeek} {...defaultProps} isCompleted={isCompleted}/>
                 )

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { fetchCall } from '../utils';
 import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
+import ReactTooltip from 'react-tooltip';
+
 
 const footerStyling = {
     display: 'flex',
@@ -74,7 +76,8 @@ function TargetEditModal({setTargets, _id, title, notes, weeklyTargetTime }) {
 
     return (
         <>
-            <EditOutlinedIcon onClick={handleShow} fontSize='small'/>
+            <ReactTooltip/>
+            <EditOutlinedIcon className='icon' data-tip='Edit Target' data-place='right' onClick={handleShow} fontSize='small'/>
 
             <Modal
                 show={show}
