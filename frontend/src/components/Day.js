@@ -13,13 +13,12 @@ const Day = ({ currentTarget, setCurrentTarget, setTargets, workDay, day, inMont
     }
 
     // Apply styling to workdays
-    // Todo: add styling such that it scales with how much time is put in
     let pulsingCircle = null;
     if (workDay) {
         let workTime = workDay.workTime     // Stored as seconds in API
         
-        let minDiameter = 40; // in px
-        let maximumDiameter = 180;
+        let minDiameter = 40; // 40% of height of div
+        let maximumDiameter = 180;  // 180% of height of div
         let timeToMax = 8 * 60 * 60; // seconds
         // Linear scaling with workTime for how large the circle will be
         // diameter = (160 / [8 * 60 * 60]) x + 40
@@ -30,8 +29,8 @@ const Day = ({ currentTarget, setCurrentTarget, setTargets, workDay, day, inMont
         // results
         let diameter = slope * workTime + minDiameter;
         let offset = Math.floor(diameter / 2);      // Center the circle on the bottom left corner
-        diameter += 'px';
-        offset = offset * -1 + 'px';
+        diameter += '%';
+        offset = offset * -1 + '%';
 
         pulsingCircle = <div className="pulsing-circle" style={{height: diameter, width: diameter, bottom: offset, left: offset}}></div>
 
@@ -48,7 +47,6 @@ const Day = ({ currentTarget, setCurrentTarget, setTargets, workDay, day, inMont
                 inputDate={day}
             >
                 <div className='day' style={{height: '100%', width: '100%'}}>
-
                     <div className='day-date-header'>{day.getDate()}</div>
                     {workDay ? (<div>{secToDisplay(workDay.workTime)}</div>) : null}
                 </div>

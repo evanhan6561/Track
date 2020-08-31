@@ -5,3 +5,8 @@
     padding: 5px;
     overflow: hidden;
 }
+
+/* Make the text within a day go above the pulsing circle animation */
+.day * {
+    z-index: 1;
+}
