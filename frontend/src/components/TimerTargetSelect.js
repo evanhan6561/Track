@@ -27,8 +27,8 @@ const TimerTargetSelect = ({ targets, selectedTimerTargetId, setSelectedTimerTar
     if (targets) {
         return (
             <Form.Group controlId="target-timer-select">
-                <div>Selected: {selectedTimerTargetId}</div>
-                <Form.Label>Working Towards:</Form.Label>
+                {/* <div>Selected: {selectedTimerTargetId}</div>
+                <Form.Label>Working Towards:</Form.Label> */}
                 <Form.Control as="select" onChange={handleChange} value={selectedTimerTargetId}>
                     {options}
                 </Form.Control>

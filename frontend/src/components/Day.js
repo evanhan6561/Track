@@ -50,7 +50,7 @@ const Day = ({ currentTarget, setCurrentTarget, setTargets, workDay, day, inMont
                 <div className='day' style={{height: '100%', width: '100%'}}>
 
                     <div className='day-date-header'>{day.getDate()}</div>
-                    {workDay ? (<div>{secToMin(workDay.workTime)} min</div>) : null}
+                    {workDay ? (<div>{secToDisplay(workDay.workTime)}</div>) : null}
                 </div>
             </DayEditModal>
             {pulsingCircle}
@@ -63,4 +63,28 @@ export default Day;
 
 function secToMin(seconds) {
     return Math.floor(seconds / 60);
+}
+
+function secToDisplay(seconds){
+    let min = secToMin(seconds);
+
+    // Display minutes if less than one hour
+    if (min < 60){
+        return `${min} min`;
+    }
+
+    // Numerically Calculate the number of hours including decimal
+    let hours = Math.floor(min / 60);
+    let remainingMin = hours % 60;
+    let decimalMin = remainingMin / 60; // Format as
+    let finalHours = hours + decimalMin;
+
+    // Display the number of hours with only a single decimal
+    let displayString = finalHours.toFixed(1); // Only display 1 decimal
+
+    // Omit the decimal if the displayString ends with '.0'
+    if (displayString[displayString.length - 1] === '0'){
+        displayString = displayString.substr(0, displayString.length - 2);
+    }
+    return `${displayString} hrs`;
 }

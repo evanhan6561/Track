@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import TargetEditModal from '../modals/TargetEditModal';
 import TargetCreateModal from '../modals/TargetCreateModal';
 import { useEffect, useState } from 'react';
-
+// import ReactTooltip from 'react-tooltip';
 
 const TargetSelect = ({ currentTarget, setCurrentTarget, targets, setTargets }) => {
     let [targetEntries, setTargetEntries] = useState(null);

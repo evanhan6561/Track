@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { useEffect, useContext } from 'react';
 import { numToMonth, getMonth, fetchCall } from '../utils';
 import { AuthContext } from '../contexts/AuthContext';
+import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+import ReactTooltip from 'react-tooltip';
+
 
 import Weeks from './Weeks';
 import Sidebar from './Sidebar';
 import '../css/Layout.css';
 import '../css/Icon.css';
 import AccountButtons from './AccountButtons';
+import { Button } from 'react-bootstrap';
 
 
 /** Month Component: Note that Date Objects use 0-11 to describe months. This is unintuitive so 
@@ -53,7 +58,8 @@ const Layout = () => {
     }
 
     return (
-        <>
+        <>  
+            <ReactTooltip />
             <main>
                 <header>
                     <div className='logo'>Track.</div>
@@ -63,10 +69,11 @@ const Layout = () => {
                             {numToMonth(date.getMonth() + 1)} {date.getFullYear()}
                         </div>
                         <div>
-                            <input type='button' value='Prev' onClick={prevMonth} />
-                            <input type='button' value='Next' onClick={nextMonth} />
-                            <input type='button' value='Today' onClick={() => setDate(today)} />
-                            <input type='button' value='Rerender' onClick={() => setDate(new Date(date))} />
+                            <KeyboardArrowLeftIcon data-tip='Previous Month' data-place='bottom' className='icon' onClick={prevMonth}/>
+                            <KeyboardArrowRightIcon data-tip='Next Month' data-place='bottom' className='icon' onClick={nextMonth}/>                            
+                        </div>
+                        <div>
+                            <Button variant="outline-dark" onClick={() => setDate(today)}>Today</Button>
                         </div>
                         <div>
                             <AccountButtons />

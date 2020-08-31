@@ -13,9 +13,8 @@ header{
     grid-column: 1 / 3;
     padding: 1em;
     min-height: 2em;
-    background-color: #93F1DD;
+    background-color: #93f1dde1;
 
-    color: #337054;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -1,27 +1,6 @@
 .timer-content-wrapper{
-    display: grid;
-    border: 1px solid rebeccapurple;
-    grid-template-columns: auto 1fr;
-}
-
-.timer-list{
-    list-style-type: none;
-    padding: 0px;
-    border-right: 1px solid salmon;
-    max-width: 18px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    height: 100%;
-    margin: 0px;
-}
-
-.timer-list img{
-    max-width: 16px;
-}
-
-.timer-list img:hover{
-    cursor: pointer;
 }
 
 .timer-current{

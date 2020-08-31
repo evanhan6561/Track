@@ -45,7 +45,7 @@ function TargetCreateModal({setTargets}) {
 
     return (
         <>
-            <AddIcon onClick={handleShow} className='icon'/>
+            <AddIcon data-tip='Add Target' data-place='right' onClick={handleShow} className='icon'/>
 
             <Modal
                 show={show}

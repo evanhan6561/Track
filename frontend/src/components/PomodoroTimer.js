@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import CustomPomodoroForm from './CustomPomodoroForm';
 import { fetchCall } from '../utils';
+import { Button, ButtonGroup } from 'react-bootstrap';
+import CustomizePomodoroModal from '../modals/CustomizePomodoroModal';
 
 const PomodoroTimer = ({ setTargets, currentTarget, setCurrentTarget, timer, selectedTimerTargetId }) => {
     let timerStyle = { display: 'none' };
@@ -140,10 +141,16 @@ const PomodoroTimer = ({ setTargets, currentTarget, setCurrentTarget, timer, sel
                 <div>{displayTime()}</div>
             </div>
             <div>
-                <input type='button' onClick={startStop} value={ticking ? 'Stop' : 'Start'} />
-                <input type='button' onClick={reset} value='Reset' />
+                <ButtonGroup>
+                    <Button onClick={startStop} value={ticking ? 'Stop' : 'Start'}>{ticking ? 'Stop' : 'Start'}</Button>
+                    <Button onClick={reset}>Reset</Button>
+                </ButtonGroup>
             </div>
-            <CustomPomodoroForm
+            {/* <CustomPomodoroForm
+                setStartingWorkCentiseconds={setStartingWorkCentiseconds}
+                setStartingRestCentiseconds={setStartingRestCentiseconds}
+            /> */}
+            <CustomizePomodoroModal
                 setStartingWorkCentiseconds={setStartingWorkCentiseconds}
                 setStartingRestCentiseconds={setStartingRestCentiseconds}
             />
