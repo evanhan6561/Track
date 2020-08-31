@@ -3,14 +3,18 @@ import { v4 as uuidv4 } from 'uuid';
 import Day from './Day';
 import '../css/Week.css'
 import { getMonth } from '../utils';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 const daysInWeek = 7;
 
 const Week = ({ setTargets, currentTarget, setCurrentTarget, workWeek, sunday, viewedMonth, weeksToDisplay, isCompleted }) => {
+    const {loggedIn} = useContext(AuthContext);
+
     let weekStyle = {
         height: '' + (100 / weeksToDisplay) + '%'
     }
-    if (isCompleted){
+    if (isCompleted && loggedIn){
         weekStyle.borderLeft = '5px solid rgba(226, 194, 255, 1)'
         // weekStyle.borderTop = '5px solid rgba(226, 194, 255, 1)'
         // weekStyle.borderBottom = '5px solid rgba(226, 194, 255, 1)'

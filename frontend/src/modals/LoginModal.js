@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Modal, Form } from 'react-bootstrap';
 import {fetchCall} from '../utils'; 
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import {AuthContext} from '../contexts/AuthContext';
 
 
@@ -11,11 +11,24 @@ function LoginModal() {
     // Form Logic
     const [username, setUsername] = useState('test');       // To-Do: Change these default values to ''
     const [password, setPassword] = useState('password');
+    const [success, setSuccess] = useState(null);
+
+
+    // API Response message
+    let feedback = null;
+    if (success === true){
+        feedback = <div style={{color: 'green'}}>Login Successful</div>
+    }else if (success === false){
+        feedback = <div style={{color: 'red'}}>Login Failed. Likely invalid username or password.</div>
+    }
 
     // Modal Logic
     const [show, setShow] = useState(false);
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setSuccess(null);
+        setShow(false)
+    };
     const handleShow = () => setShow(true);
 
     const handleLogin = async () => {
@@ -31,7 +44,10 @@ function LoginModal() {
         }
         let json = await fetchCall(url, options);
         if (json.loggedIn){
+            setSuccess(true);
             setLoggedIn(true);
+        }else{
+            setSuccess(false);
         }
     }
 
@@ -51,18 +67,20 @@ function LoginModal() {
                     <Modal.Title>Login</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <form>
-                        <div>
-                            <label htmlFor="login-form-username">Username:</label><br/>
-                            <input type='text' value={username} onChange={(e) => { setUsername(e.target.value) }} id='login-form-username' />
-                        </div>
-                        <div>
-                            <label htmlFor="login-form-password">Password:</label><br/>
-                            <input type='text' value={password} onChange={(e) => { setPassword(e.target.value) }} id='"login-form-password"'/>
-                        </div>
-                    </form>
+                    <Form>
+                        <Form.Group controlId='login-form-username'>
+                            <Form.Label>Username</Form.Label>
+                            <Form.Control type='text' value={username} onChange={(e) => { setUsername(e.target.value) }}/>
+                        </Form.Group>
+                        <Form.Group controlId='login-form-password'>
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control type='text' value={password} onChange={(e) => { setPassword(e.target.value) }}/>
+                        </Form.Group>
+
+                    </Form>
                 </Modal.Body>
                 <Modal.Footer>
+                    {feedback}
                     <Button variant="primary" onClick={handleLogin}>Login</Button>
                 </Modal.Footer>
             </Modal>

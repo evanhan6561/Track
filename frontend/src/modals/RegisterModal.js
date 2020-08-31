@@ -6,13 +6,23 @@ function RegisterModal() {
     // Form Logic
     const [username, setUsername] = useState('');      
     const [password, setPassword] = useState('');
-    const [status, setStatus] = useState(undefined);
+    const [success, setSuccess] = useState(null);
+
+    let feedback = null;
+    if (success === true){
+        feedback = <div style={{color: 'green'}}>Registration Successful</div>
+    }else if (success === false){
+        feedback = <div style={{color: 'red'}}>Registration Failed. Likely username is already taken.</div>
+    }
 
     // Modal Logic
     const [show, setShow] = useState(false);
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const handleClose = () => {
+        setSuccess(null);
+        setShow(false);
+    };
+    const handleShow = () => {setShow(true)};
 
 
     const handleRegistration = async () => {
@@ -26,14 +36,13 @@ function RegisterModal() {
             headers: {'Content-Type' : 'application/json'},
             body: data
         }
-        setStatus('Loading');
         let json = await fetchCall(url, options);
         // To-Do: Integrate loading into callFetch
         if (json.success){
             console.log('Successfully Registered', json);
-            setStatus('Success');
+            setSuccess(true);
         }else{
-            setStatus('Failure');
+            setSuccess(false);
         }
     }
 
@@ -63,9 +72,9 @@ function RegisterModal() {
                             <input type='text' value={password} onChange={(e) => { setPassword(e.target.value) }} id='register-form-password'/>
                         </div>
                     </form>
-                    Status: {status}
                 </Modal.Body>
                 <Modal.Footer>
+                    {feedback}
                     <Button variant="primary" onClick={handleRegistration}>Register</Button>
                 </Modal.Footer>
             </Modal>

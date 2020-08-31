@@ -3,9 +3,12 @@ import React from 'react';
 import '../css/Day.css';
 import '../css/PulsingCircle.css';
 import DayEditModal from '../modals/DayEditModal';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 const Day = ({ currentTarget, setCurrentTarget, setTargets, workDay, day, inMonth }) => {
+    const {loggedIn} = useContext(AuthContext);
+
     let dayRef = useRef(null);
     let pulseRef = useRef(null);
 
@@ -23,34 +26,10 @@ const Day = ({ currentTarget, setCurrentTarget, setTargets, workDay, day, inMont
         bottom: 0,
         left: 0
     }
-    // if (workDay) {
-    //     let workTime = workDay.workTime     // Stored as seconds in API
-
-    //     let minDiameter = 40; // 40% of height of div
-    //     let maximumDiameter = 180;  // 180% of height of div
-    //     let timeToMax = 8 * 60 * 60; // seconds
-    //     // Linear scaling with workTime for how large the circle will be
-    //     // diameter = (160 / [8 * 60 * 60]) x + 40
-    //     //  - I decided maximum diameter should be 200px, min diameter should be 40px
-    //     //  - Maximum possible diameter can only be achieved after 8 hrs input.
-    //     let slope = (maximumDiameter - minDiameter) / (timeToMax);
-
-    //     // results
-    //     let diameter = slope * workTime + minDiameter;
-    //     let offset = Math.floor(diameter / 2);      // Center the circle on the bottom left corner
-    //     diameter += '%';
-    //     offset = offset * -1 + '%';
-    //     pulsingStyle.height = diameter
-    //     pulsingCircle = <div className="pulsing-circle" style={{ height: diameter, width: diameter, bottom: offset, left: offset }}></div>
-
-    //     // Scale size with workTime only, let's say max size should be @ 8hrs work, or 8 * 60 * 60 seconds.
-
-    // }
-
 
     // I want the circle to be aware of how large it is rendered and scale the css to its display height.
     useEffect(() => {
-        if (workDay) {
+        if (workDay && loggedIn) {
             // Make Circle Diameter scale linearly with clientHeight
             // diameter = ([maxDiameter - minDiameter] / [timeToMax]) x + minDiameter
             const clientHeight = dayRef.current.clientHeight;
@@ -87,10 +66,10 @@ const Day = ({ currentTarget, setCurrentTarget, setTargets, workDay, day, inMont
             >
                 <div className='day' style={{ height: '100%', width: '100%' }}>
                     <div className='day-date-header'>{day.getDate()}</div>
-                    {workDay ? (<div>{secToDisplay(workDay.workTime)}</div>) : null}
+                    {workDay && loggedIn ? (<div>{secToDisplay(workDay.workTime)}</div>) : null}
                 </div>
             </DayEditModal>
-            {workDay ? <div className="pulsing-circle" ref={pulseRef} style={pulsingStyle}></div> : null}
+            {workDay && loggedIn ? <div className="pulsing-circle" ref={pulseRef} style={pulsingStyle}></div> : null}
         </td>
     );
 }

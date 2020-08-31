@@ -115,9 +115,11 @@ const Stopwatch = ({ setTargets, currentTarget, setCurrentTarget, timer, selecte
 
             }else{
                 // Todo: Responsive Error Message to User
+                alert('The server was unable to process your request.')
             }
         }else{
             // Tell user a target must be selected in order to add time.
+            alert('A Target must be selected from the dropdown.')
         }
     }
 

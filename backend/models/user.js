@@ -8,7 +8,11 @@ const TargetSchema = new Schema({
         required: [true, 'Title is required']
     },
     notes: String,
-    weeklyTargetTime: Number,
+    weeklyTargetTime: {
+        type: Number,
+        validate: {validator: isPositiveInt, msg: 'weeklyTargetTime must be a positive integer'},
+        required: [true, 'Weekly Target Time is required']
+    },
     weeks: [{
         type: Schema.Types.ObjectId,    // Not embedded, rather an array of ObjectID
         ref: 'week' 
@@ -32,3 +36,8 @@ const UserSchema = new Schema({
 const User = mongoose.model('user', UserSchema);
 
 module.exports = User;
+
+
+function isPositiveInt(n){
+    return n > 0 && Number.isInteger(n);
+}

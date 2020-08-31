@@ -3,7 +3,7 @@ import { Button, Modal, Form } from 'react-bootstrap';
 import { fetchCall } from '../utils';
 import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
 import ReactTooltip from 'react-tooltip';
-
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
 const footerStyling = {
     display: 'flex',
@@ -15,6 +15,17 @@ function TargetEditModal({setTargets, _id, title, notes, weeklyTargetTime }) {
     const [titleInput, setTitleInput] = useState(title);
     const [notesInput, setNotesInput] = useState(notes);
     const [weeklyTargetTimeInput, setWeeklyTargetTimeInput] = useState(weeklyTargetTime);
+
+    const [success, setSuccess] = useState(null);
+
+
+    // API Response message
+    let feedback = null;
+    if (success === true){
+        feedback = <div style={{color: 'green'}}>Target Successfully altered.</div>
+    }else if (success === false){
+        feedback = <div style={{color: 'red'}}>Failed to alter Target.</div>
+    }
 
     const handleEdits = async (e) => {
         e.preventDefault();
@@ -35,6 +46,7 @@ function TargetEditModal({setTargets, _id, title, notes, weeklyTargetTime }) {
 
         // Update local state. Create a copy to trigger rerender. Replace the edited target.
         if (response.success) {
+            setSuccess(true);
             setTargets(targets => {
                 let copy = targets.map( target => {
                     if (target._id === _id){
@@ -45,6 +57,8 @@ function TargetEditModal({setTargets, _id, title, notes, weeklyTargetTime }) {
                 })
                 return copy;
             });
+        }else{
+            setSuccess(false);
         }
     }
 
@@ -58,7 +72,10 @@ function TargetEditModal({setTargets, _id, title, notes, weeklyTargetTime }) {
 
         // Filter out the deleted target locally.
         if (response.success){
+            setSuccess(true);
             setTargets(targets => targets.filter(target => target._id !== _id));
+        }else{
+            setSuccess(false);
         }
     }
 
@@ -94,6 +111,7 @@ function TargetEditModal({setTargets, _id, title, notes, weeklyTargetTime }) {
                         <Form.Group controlId="formTargetTitle">
                             <Form.Label>Title</Form.Label>
                             <Form.Control type="text" defaultValue={titleInput} onChange={(e) => setTitleInput(e.target.value)} />
+                            <Form.Text className='text-muted'>*required</Form.Text>
                         </Form.Group>
 
                         <Form.Group controlId="formTargetNotes">
@@ -105,11 +123,17 @@ function TargetEditModal({setTargets, _id, title, notes, weeklyTargetTime }) {
                         <Form.Group controlId="formWeeklyTargetTime">
                             <Form.Label>Weekly Target Time (hrs)</Form.Label>
                             <Form.Control type="number" defaultValue={weeklyTargetTimeInput} onChange={(e) => setWeeklyTargetTimeInput(e.target.value)} />
+                            <Form.Text className='text-muted'>*required. Must be &ge; 0</Form.Text>
                         </Form.Group>
 
                     </Modal.Body>
                     <Modal.Footer style={footerStyling}>
-                        <Button variant="danger" onClick={handleDelete}>Delete Target</Button>
+                        <ReactTooltip/>
+                        <Button variant='danger' data-tip='Delete Target Forever' data-place='bottom' onClick={handleDelete}>
+                            <DeleteForeverIcon  />
+                        </Button>
+
+                        {feedback}
 
                         <Button variant="primary" type="submit">
                             Save Changes

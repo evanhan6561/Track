@@ -56,7 +56,8 @@ router.get('/targets', async function (req, res, next) {
 
 
         res.send({
-            targets: populatedUser.targets
+            targets: populatedUser.targets,
+            success: true
         });
     } catch (error) {
         next(error);

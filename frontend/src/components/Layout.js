@@ -29,13 +29,16 @@ const Layout = () => {
         const retrieveTargets = async () => {
             if (loggedIn) {
                 let url = process.env.REACT_APP_API_HOST + '/api/targets';
-                let json = await fetchCall(url);
-                console.log('Layout Component - Retrieve All Targets :>> ', json);
-                setTargets(json.targets);
-
-                // Set currentTargetId to the very first item in targets if any exist.
-                if (json.targets.length > 0){
-                    setCurrentTarget(json.targets[0]);
+                let response = await fetchCall(url);
+                console.log('Layout Component - Retrieve All Targets :>> ', response);
+                if (response.success) {
+                    setTargets(response.targets);
+                    // Set currentTargetId to the very first item in targets if any exist.
+                    if (response.targets.length > 0) {
+                        setCurrentTarget(response.targets[0]);
+                    }
+                }else{
+                    alert('Unable to retrieve Targets of the User.')
                 }
             }
         }
@@ -58,7 +61,7 @@ const Layout = () => {
     }
 
     return (
-        <>  
+        <>
             <ReactTooltip />
             <main>
                 <header>
@@ -69,30 +72,30 @@ const Layout = () => {
                             {numToMonth(date.getMonth() + 1)} {date.getFullYear()}
                         </div>
                         <div>
-                            <KeyboardArrowLeftIcon data-tip='Previous Month' data-place='bottom' className='icon' onClick={prevMonth}/>
-                            <KeyboardArrowRightIcon data-tip='Next Month' data-place='bottom' className='icon' onClick={nextMonth}/>                            
+                            <KeyboardArrowLeftIcon data-tip='Previous Month' data-place='bottom' className='icon' onClick={prevMonth} />
+                            <KeyboardArrowRightIcon data-tip='Next Month' data-place='bottom' className='icon' onClick={nextMonth} />
                         </div>
                         <div>
                             <Button variant="outline-dark" onClick={() => setDate(today)}>Today</Button>
                         </div>
                         <div>
-                            <AccountButtons />
+                            <AccountButtons setCurrentTarget={setCurrentTarget} setTargets={setTargets}/>
                         </div>
                     </div>
                 </header>
 
-                <Sidebar 
-                    currentTarget={currentTarget} 
-                    setCurrentTarget={setCurrentTarget} 
-
-                    targets={targets} 
-                    setTargets={setTargets}
-                />
-                <Weeks 
-                    currentTarget={currentTarget} 
+                <Sidebar
+                    currentTarget={currentTarget}
                     setCurrentTarget={setCurrentTarget}
 
-                    date={date} 
+                    targets={targets}
+                    setTargets={setTargets}
+                />
+                <Weeks
+                    currentTarget={currentTarget}
+                    setCurrentTarget={setCurrentTarget}
+
+                    date={date}
                     viewedMonth={getMonth(date)}
 
                     setTargets={setTargets}

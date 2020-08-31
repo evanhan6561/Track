@@ -60,6 +60,7 @@ const PomodoroTimer = ({ setTargets, currentTarget, setCurrentTarget, timer, sel
 
                 }else{
                     // Todo: Responsive Error Message to User
+                    alert('The server was unable to process your request.')
                 }
             }
         }

@@ -6,9 +6,10 @@ import { fetchCall } from '../utils';
 
 // Todo: Pass down these props all the way from the component, Layout?
 function DayEditModal(props) {
-    const { targetId, setTargets, setCurrentTarget, inputDate } = props
+    const { targetId, setTargets, setCurrentTarget, inputDate } = props;
 
     // Form Logic
+    
 
     // Use the custom hook for the integer only form
     let addSettings = {

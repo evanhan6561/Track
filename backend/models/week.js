@@ -20,7 +20,8 @@ let weekValidators = [
 
 const WeekSchema = new Schema({
     weeklyTargetTime: {
-        type: Number,           // in seconds
+        type: Number,           
+        validate: {validator: isPositiveInt, msg: 'weeklyTargetTime must be a positive integer'},
         required: [true, 'Weekly Target Time is required to create a Week.']
     },
     days: {

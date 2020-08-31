@@ -3,8 +3,12 @@ import { Form } from 'react-bootstrap';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 const TimerTargetSelect = ({ targets, selectedTimerTargetId, setSelectedTimerTargetId }) => {
+    const {loggedIn} = useContext(AuthContext);
+
     const [options, setOptions] = useState([]);
 
     // Generate an option for each target
@@ -34,10 +38,12 @@ const TimerTargetSelect = ({ targets, selectedTimerTargetId, setSelectedTimerTar
                 </Form.Control>
             </Form.Group>
         )
-    } else {
+    } else if (loggedIn) {
         return (
             <div>Loading...</div>
         )
+    } else{
+        return null;
     }
 
 }

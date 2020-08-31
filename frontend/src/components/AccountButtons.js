@@ -5,7 +5,7 @@ import RegisterModal from '../modals/RegisterModal';
 import { fetchCall } from '../utils';
 import { Button } from 'react-bootstrap';
 
-const AccountButtons = () => {
+const AccountButtons = ({setTargets, setCurrentTarget}) => {
     const { loggedIn, setLoggedIn } = useContext(AuthContext);
 
     const handleLogout = async () => {
@@ -17,7 +17,13 @@ const AccountButtons = () => {
 
             // Set state to logged out if API call returns successful
             if (respJSON.success) {
+                setTargets(null);
+                setCurrentTarget(null);
                 setLoggedIn(false);
+                
+            }else{
+                // Error Message
+                alert('Logout Failed');
             }
         } catch (error) {
             console.log(error);
