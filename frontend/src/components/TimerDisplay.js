@@ -20,7 +20,7 @@ const timerReducer = (state, action) => {
 
 const TimerDisplay = ({ targets, setTargets, currentTarget, setCurrentTarget }) => {
     const [timer, dispatch] = useReducer(timerReducer, 'Pomodoro');
-    const [selectedTimerTargetId, setSelectedTimerTargetId] = useState(null);
+    const [selectedTimerTargetId, setSelectedTimerTargetId] = useState('');
 
     if (selectedTimerTargetId === null) {
         if (targets && targets.length > 0) {
@@ -30,6 +30,7 @@ const TimerDisplay = ({ targets, setTargets, currentTarget, setCurrentTarget }) 
 
     return (
         <div className='timer-display-wrapper'>
+            <ReactTooltip />
             <h4>Timers:</h4>
             <div className='timer-content-wrapper'>
                 <div>

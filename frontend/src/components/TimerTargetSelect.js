@@ -31,8 +31,6 @@ const TimerTargetSelect = ({ targets, selectedTimerTargetId, setSelectedTimerTar
     if (targets) {
         return (
             <Form.Group controlId="target-timer-select">
-                {/* <div>Selected: {selectedTimerTargetId}</div>
-                <Form.Label>Working Towards:</Form.Label> */}
                 <Form.Control as="select" onChange={handleChange} value={selectedTimerTargetId}>
                     {options}
                 </Form.Control>
@@ -43,7 +41,7 @@ const TimerTargetSelect = ({ targets, selectedTimerTargetId, setSelectedTimerTar
             <div>Loading...</div>
         )
     } else{
-        return null;
+        return '';
     }
 
 }

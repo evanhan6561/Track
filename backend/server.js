@@ -5,6 +5,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const authRoutes = require('./routes/api-auth');
 const targetRoutes = require('./routes/api-targets');
@@ -46,6 +47,14 @@ app.use(session({
         secure: isSecure
     }
 }))
+
+
+// Landing Page
+app.use(express.static(path.join(__dirname, 'build')));
+app.get('/', function(req, res) {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
 
 // Routes
 app.use('/api/', authRoutes);       // Use the imported routes

@@ -102,5 +102,6 @@ function secToDisplay(seconds) {
     if (displayString[displayString.length - 1] === '0') {
         displayString = displayString.substr(0, displayString.length - 2);
     }
-    return `${displayString} hrs`;
+
+    return `${displayString} hr ${remainingMin} min`;
 }
