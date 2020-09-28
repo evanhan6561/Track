@@ -91,17 +91,7 @@ function secToDisplay(seconds) {
 
     // Numerically Calculate the number of hours including decimal
     let hours = Math.floor(min / 60);
-    let remainingMin = hours % 60;
-    let decimalMin = remainingMin / 60; // Format as
-    let finalHours = hours + decimalMin;
+    let remainingMin = min % 60;
 
-    // Display the number of hours with only a single decimal
-    let displayString = finalHours.toFixed(1); // Only display 1 decimal
-
-    // Omit the decimal if the displayString ends with '.0'
-    if (displayString[displayString.length - 1] === '0') {
-        displayString = displayString.substr(0, displayString.length - 2);
-    }
-
-    return `${displayString} hr ${remainingMin} min`;
+    return `${hours} hr ${remainingMin} min`;
 }
