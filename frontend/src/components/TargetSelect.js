@@ -111,7 +111,7 @@ const TargetSelect = ({ currentTarget, setCurrentTarget, targets, setTargets }) 
                 <Form.Group>
                     <Form.Label as="legend" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <div>Targets:</div>
-                        <TargetCreateModal setTargets={setTargets} />
+                        <TargetCreateModal targets={targets} setTargets={setTargets} setCurrentTarget={setCurrentTarget}/>
 
                     </Form.Label>
                     <Col sm={15}>

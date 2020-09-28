@@ -5,7 +5,7 @@ import AddIcon from '@material-ui/icons/Add';
 import {fetchCall} from '../utils';
 import {AuthContext} from '../contexts/AuthContext';
 
-function TargetCreateModal({setTargets}) {
+function TargetCreateModal({targets, setTargets, setCurrentTarget}) {
     const { loggedIn } = useContext(AuthContext);
     
 
@@ -44,11 +44,21 @@ function TargetCreateModal({setTargets}) {
         if (response.success) {
             // push the returned target onto a copy to trigger rerender
             setSuccess(true);
+
+            
+
             setTargets(targets => {
                 let copy = targets.map(target => target);
                 copy.push(response.target);
+
+                // If the user has 0 targets, setCurrentTarget to the one entry
+                if (targets.length == 0){
+                    console.log('targets.length :>> ', targets.length);
+                    setCurrentTarget(copy[0]);
+                }
                 return copy;
             });
+            
         }else{
             // Todo: Tell the user if an error occurs with something red.
             setSuccess(false);

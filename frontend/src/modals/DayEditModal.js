@@ -107,11 +107,6 @@ function DayEditModal(props) {
                     </Form>
 
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button onClick={handleDayEdit}>Confirm</Button>
-                </Modal.Footer>
-
-
             </Modal>
         </>
     );
