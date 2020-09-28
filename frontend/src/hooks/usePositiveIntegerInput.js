@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 /**
  * Returns a reusable input that makes use of input:text rather than input:number to ensure that users can only enter

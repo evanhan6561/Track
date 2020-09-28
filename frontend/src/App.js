@@ -14,7 +14,6 @@ import AuthContextProvider from './contexts/AuthContext';
 //     let responseJSON = await response.json();
 //     console.log(responseJSON);
 // }
-console.log('bruh o boy');
 function App() {
     return (
         <div className="App">

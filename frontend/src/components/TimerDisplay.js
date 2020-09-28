@@ -22,7 +22,7 @@ const TimerDisplay = ({ targets, setTargets, currentTarget, setCurrentTarget }) 
     const [timer, dispatch] = useReducer(timerReducer, 'Pomodoro');
     const [selectedTimerTargetId, setSelectedTimerTargetId] = useState('');
 
-    if (selectedTimerTargetId === null) {
+    if (selectedTimerTargetId === '') {
         if (targets && targets.length > 0) {
             setSelectedTimerTargetId(targets[0]._id);
         }

@@ -27,12 +27,6 @@ const Weeks = ({ setTargets, currentTarget, setCurrentTarget, date, viewedMonth 
                 return sundayOfWeek < firstSunday;
             }
 
-            
-            let pureDates = currentTarget.weeks.map(week => {
-                return week.days[0].date;
-            })
-            console.log('currentTarget.weeks Dates :>> ', pureDates);
-
             // Assumption: if 1/31/2020 in UTC is a Sunday, 1/31/2020 is a Sunday in all local timezones
             let weeks = currentTarget.weeks;
             let firstSunday = previousSunday(date);

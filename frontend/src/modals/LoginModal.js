@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
 import {fetchCall} from '../utils'; 
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import {AuthContext} from '../contexts/AuthContext';
 
 

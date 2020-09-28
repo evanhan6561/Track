@@ -30,7 +30,6 @@ const Layout = () => {
             if (loggedIn) {
                 let url = process.env.REACT_APP_API_HOST + '/api/targets';
                 let response = await fetchCall(url);
-                console.log('Layout Component - Retrieve All Targets :>> ', response);
                 if (response.success) {
                     setTargets(response.targets);
                     // Set currentTargetId to the very first item in targets if any exist.

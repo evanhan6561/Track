@@ -13,7 +13,6 @@ const AuthContextProvider = (props) => {
     // If we're done loading an
     useEffect(() => {
         if (!loading && data.loggedIn) {
-            console.log('Auth Context Auto Login:', data, loading);
             setLoggedIn(true);
         }
     }, [data, loading]);

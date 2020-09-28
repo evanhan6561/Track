@@ -44,16 +44,13 @@ function TargetCreateModal({targets, setTargets, setCurrentTarget}) {
         if (response.success) {
             // push the returned target onto a copy to trigger rerender
             setSuccess(true);
-
             
-
             setTargets(targets => {
                 let copy = targets.map(target => target);
                 copy.push(response.target);
 
                 // If the user has 0 targets, setCurrentTarget to the one entry
-                if (targets.length == 0){
-                    console.log('targets.length :>> ', targets.length);
+                if (targets.length === 0){
                     setCurrentTarget(copy[0]);
                 }
                 return copy;

@@ -8,8 +8,8 @@ const PomodoroTimer = ({ setTargets, currentTarget, setCurrentTarget, timer, sel
     if (timer === 'Pomodoro') {
         timerStyle = { display: 'block' }
     }
-    const [startingWorkCentiseconds, setStartingWorkCentiseconds] = useState(10 * 5);
-    const [startingRestCentiseconds, setStartingRestCentiseconds] = useState(10 * 3);
+    const [startingWorkCentiseconds, setStartingWorkCentiseconds] = useState(10 * 60 * 25);
+    const [startingRestCentiseconds, setStartingRestCentiseconds] = useState(10 * 60 * 5);
 
     const [centiseconds, setCentiseconds] = useState(startingWorkCentiseconds);
     const [ticking, setTicking] = useState(false);
@@ -41,6 +41,7 @@ const PomodoroTimer = ({ setTargets, currentTarget, setCurrentTarget, timer, sel
                     body:  data
                 };
                 let response = await fetchCall(url, options);
+                
                 if (response.success){
                     // Update local state: target and currentTarget.
                     let updatedTarget = response.target;

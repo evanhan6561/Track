@@ -25,7 +25,6 @@ export const useFetch = (url, extraOptions) => {
                 const responseJSON = await response.json();
                 setData(responseJSON);
                 setLoading(false);
-                console.log('Data Received:', responseJSON)
             } catch (error) {
                 // Aborting throws an error. We can can ignore the console log with the below code if desired.
                 // if (!controller.signal.aborted){

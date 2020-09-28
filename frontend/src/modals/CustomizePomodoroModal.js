@@ -50,6 +50,7 @@ function CustomizePomodoroModal({ setStartingWorkCentiseconds, setStartingRestCe
 
     return (
         <>  
+            <ReactTooltip />
             <SettingsIcon data-tip='Customize Intervals' data-place='right' className='icon' onClick={handleShow} />
 
 
